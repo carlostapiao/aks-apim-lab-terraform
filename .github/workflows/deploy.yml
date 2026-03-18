@@ -1,4 +1,4 @@
-name: CI/CD AKS Terraform + Apps
+name: Full AKS + APIM CI/CD
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
 
@@ -15,19 +16,19 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Terraform Apply
+    - name: Terraform Init & Apply
       run: |
         cd terraform
         terraform init
         terraform apply -auto-approve
 
-    - name: Build apps in ACR
+    - name: Build microservices in ACR
       run: |
-        az acr build --registry Carlos69lamejor --image app1:v1 app/app1
-        az acr build --registry Carlos69lamejor --image app2:v1 app/app2
-        az acr build --registry Carlos69lamejor --image app3:v1 app/app3
+        az acr build --registry Carlos69lamejor --image app1:v1 ../app/app1
+        az acr build --registry Carlos69lamejor --image app2:v1 ../app/app2
+        az acr build --registry Carlos69lamejor --image app3:v1 ../app/app3
 
-    - name: Deploy K8s apps + ingress
+    - name: Deploy to AKS
       run: |
         az aks get-credentials --resource-group rg-k8s-lab --name aks-lab5
-        kubectl apply -f terraform/k8s/apps.yaml
+        kubectl apply -f k8s/apps.yaml
