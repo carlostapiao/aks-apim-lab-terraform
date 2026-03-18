@@ -1,0 +1,33 @@
+name: CI/CD AKS Terraform + Apps
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Terraform Apply
+      run: |
+        cd terraform
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Build apps in ACR
+      run: |
+        az acr build --registry Carlos69lamejor --image app1:v1 app/app1
+        az acr build --registry Carlos69lamejor --image app2:v1 app/app2
+        az acr build --registry Carlos69lamejor --image app3:v1 app/app3
+
+    - name: Deploy K8s apps + ingress
+      run: |
+        az aks get-credentials --resource-group rg-k8s-lab --name aks-lab5
+        kubectl apply -f terraform/k8s/apps.yaml
