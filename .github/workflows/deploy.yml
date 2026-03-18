@@ -16,6 +16,11 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.7.9
+
     - name: Terraform Init & Apply
       run: |
         cd terraform
@@ -24,11 +29,13 @@ jobs:
 
     - name: Build microservices in ACR
       run: |
-        az acr build --registry Carlos69lamejor --image app1:v1 ../app/app1
-        az acr build --registry Carlos69lamejor --image app2:v1 ../app/app2
-        az acr build --registry Carlos69lamejor --image app3:v1 ../app/app3
+        az acr build --registry Carlos69lamejor --image app1:v1 ./app1
+        az acr build --registry Carlos69lamejor --image app2:v1 ./app2
+        az acr build --registry Carlos69lamejor --image app3:v1 ./app3
 
     - name: Deploy to AKS
       run: |
         az aks get-credentials --resource-group rg-k8s-lab --name aks-lab5
-        kubectl apply -f k8s/apps.yaml
+        kubectl apply -f k8s/app1.yaml
+        kubectl apply -f k8s/app2.yaml
+        kubectl apply -f k8s/app3.yaml
