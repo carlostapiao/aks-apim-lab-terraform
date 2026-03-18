@@ -56,7 +56,7 @@ resource "azurerm_api_management" "apim" {
   resource_group_name = azurerm_resource_group.rg.name
   publisher_name      = "Carlos"
   publisher_email     = "carlos@demo.com"
-  sku_name            = "Consumption"
+  sku_name            = "Developer"   # Cambiado de "Consumption" a "Developer"
 }
 
 # Ingress Controller Deployment
